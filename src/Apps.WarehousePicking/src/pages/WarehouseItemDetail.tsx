@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Lab_warehouseitemsService } from "@/generated/services/Lab_warehouseitemsService";
 import { Lab_warehousetransactionsService } from "@/generated/services/Lab_warehousetransactionsService";
 import { Lab_warehouselocationsService } from "@/generated/services/Lab_warehouselocationsService";
+import { Lab_productsService } from "@/generated/services/Lab_productsService";
 import type { Lab_warehousetransactions } from "@/generated/models/Lab_warehousetransactionsModel";
 import type { Lab_warehouselocations } from "@/generated/models/Lab_warehouselocationsModel";
 import { categoryOptionMetadata, statusOptions, transactionTypeOptionMetadata } from "@/utils/OptionSets";
@@ -23,6 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useStyles } from "@/styles/WarehouseItemDetail.styles";
 import { errorText, servicePayload, serviceResult } from "@/utils/ServicePayload";
 import { toNumber } from "@/utils/RecordValues";
+import BarcodeScanDialog from "@/components/BarcodeScanDialog";
+import LinkedProductImage from "@/components/LinkedProductImage";
 
 const transactionColumns: IColumn[] = [
   { name: "lab_name", displayName: "Name", dataType: "SingleLine.Text", isPrimary: true, visualSizeFactor: 240 },
@@ -37,8 +40,7 @@ const transactionColumns: IColumn[] = [
   { name: "lab_transactiondate", displayName: "Date", dataType: "DateAndTime.DateAndTime", visualSizeFactor: 120 },
 ];
 
-// The New Transaction form for this item (the item itself is bound on create): name, quantity of at
-// least 1 - the direction comes from the type - and type are all required.
+// The New Transaction form for this item requires name, quantity, and type; the item is bound on create.
 const formFields: FormField[] = [
   { column: { name: "lab_name", displayName: "Transaction Name", dataType: "SingleLine.Text", isPrimary: true }, required: true },
   { column: { name: "lab_quantity", displayName: "Quantity", dataType: "Whole.None" }, required: true },
@@ -102,6 +104,16 @@ export default function WarehouseItemDetailPage() {
       }));
       return result.data ?? [];
     },
+  });
+
+  const linkedProductId = item?._lab_productid_value;
+  const { data: linkedProduct } = useQuery({
+    queryKey: ["linkedProduct", linkedProductId],
+    queryFn: async () => {
+      const result = await serviceResult(Lab_productsService.get(linkedProductId!));
+      return result.data;
+    },
+    enabled: !!linkedProductId,
   });
 
   const transactionRows = useMemo(
@@ -224,6 +236,22 @@ export default function WarehouseItemDetailPage() {
             fields={itemFields}
             columnCount={3}
             title={item.lab_name ?? ""}
+            headerExtras={
+              <>
+                <BarcodeScanDialog
+                  itemId={id!}
+                  currentProductId={linkedProductId}
+                  onLinked={() => queryClient.invalidateQueries()}
+                />
+                {linkedProduct && (
+                  <div className={styles.inline} data-testid="linked-product-name">
+                    <LinkedProductImage productId={linkedProductId!} />
+                    <Body1 className={styles.muted}>Linked product:</Body1>
+                    <Body1 className={styles.name}>{linkedProduct.lab_name}</Body1>
+                  </div>
+                )}
+              </>
+            }
             onBack={() => navigate("/items")}
             lookupRecords={{ lab_locationid: locationRecords }}
             onSave={(values) => updateItemMutation.mutateAsync(values)}
