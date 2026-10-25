@@ -37,5 +37,8 @@
   "productDataSourceScaffolded": true,
   "openFoodFactsConnectionId": "c7007722-1446-4575-b82d-313a4e53f48c",
   "connectorDataSourceScaffolded": true,
-  "barcodeScanUiScaffolded": true
+  "barcodeScanUiScaffolded": true,
+  "configDataDirectory": "/workspaces/PPCC-lab/src/Packages.Main/Data",
+  "configDataSchemaPath": "/workspaces/PPCC-lab/src/Packages.Main/Data/data_schema.xml",
+  "configDataFilePath": "/workspaces/PPCC-lab/src/Packages.Main/Data/data.xml"
 }
