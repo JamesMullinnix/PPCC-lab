@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom"
 import Layout from "@/pages/Layout"
+import HomePage from "@/pages/Home"
 import WarehouseItemsPage from "@/pages/WarehouseItems"
 import WarehouseItemDetailPage from "@/pages/WarehouseItemDetail"
 import TransactionsPage from "@/pages/Transactions"
@@ -21,7 +22,8 @@ export const router = createBrowserRouter([
     element: <Layout showHeader={true} />,
     errorElement: <NotFoundPage />,
     children: [
-      { index: true, element: <WarehouseItemsPage /> },
+      { index: true, element: <HomePage /> },
+      { path: "home", element: <HomePage /> },
       { path: "items", element: <WarehouseItemsPage /> },
       { path: "items/:id", element: <WarehouseItemDetailPage /> },
       { path: "transactions", element: <TransactionsPage /> },
